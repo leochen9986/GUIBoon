@@ -37,7 +37,7 @@ def getListOfFiles(dirName):
 
 def get_json_data():
     
-    ser = serial.Serial('COM5', 115200, timeout=1)
+    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
     ser.reset_input_buffer()
     data=""
     while True:
