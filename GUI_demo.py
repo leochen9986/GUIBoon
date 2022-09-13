@@ -86,9 +86,10 @@ class GUI:
         
         
         # variable of event and screen counter
-        self.event_counter_n = 1
+        self.event_counter_n = 7
         self.screen_counter_n = 1
         self.total_event=len(os.listdir("media/marketing_layer"))
+        self.cap_event7=cv2.VideoCapture("media/marketing_layer/event7/1_back.mp4")
         
         #proximitysensorcheck
         self.is_Proximity = False
@@ -232,6 +233,7 @@ class GUI:
             
         if (self.esp32_data["Motion_detected"]==0 and self.testproximitybool==False) or self.state=="bottleplaced" or self.state=="bottledelayed" or self.state=="bottleremoved":
             self.ret, self.frame=self.cap.read()
+            self.ret7, self.frame7=self.cap_event7.read()
             
             
         if self.ret:
@@ -451,8 +453,12 @@ class GUI:
                     self.h,self.s,self.v = cv2.split(self.overlay_hsv)     
                     #self.v2=cv2.merge([self.v, self.v, self.v])
                     #self.added_image[self.v>0]=(self.overlay[self.v>0]*20)
-
-                    self.added_image[self.v>=50]=self.overlay[self.v>=50]                        
+                    
+                    if self.event_counter_n==7:
+                        self.added_image[self.v>=8]=self.frame7[self.v>=8]   
+                    else:
+                        self.added_image[self.v>=50]=self.overlay[self.v>=50]   
+                                         
                     
                     
                     self.resized_frame=cv2.resize(self.added_image,(self.screen_height,self.screen_width))
@@ -463,17 +469,21 @@ class GUI:
         
         else:
             self.cap.release()
+            self.cap_event7.release()
+            self.cap_event7=cv2.VideoCapture("media/marketing_layer/event7/1_back.mp4")
             #return screen1
             if self.state=="bottleremoved":
                 self.state="default"
                 self.cap.release()
+                self.cap_event7.release()
+                self.cap_event7=cv2.VideoCapture("media/marketing_layer/event7/1_back.mp4")                
                 self.screen_counter_n=1
                 self.dis_delta=0
                 self.refresh_time=20000
                 
             
             #change Screen 1 video
-            if self.event_counter_n==self.total_event:
+            if self.event_counter_n==self.total_event and self.state=="default":
                 self.event_counter_n=0
             
             if self.esp32_data["Bottle_placed"]==0 and self.state=="default":
