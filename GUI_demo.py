@@ -86,7 +86,7 @@ class GUI:
         
         
         # variable of event and screen counter
-        self.event_counter_n = 7
+        self.event_counter_n = 1
         self.screen_counter_n = 1
         self.total_event=len(os.listdir("media/marketing_layer"))
         self.cap_event7=cv2.VideoCapture("media/marketing_layer/event7/1_back.mp4")
