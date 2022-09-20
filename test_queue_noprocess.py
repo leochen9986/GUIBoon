@@ -102,11 +102,8 @@ while(cap.more()):
  
     # fps will be number of frame processed in given time frame
     # since their will be most of time error of 0.001 second
-    # we will be subtracting it to get more accurate result
-    try:
-        fps = 1/(new_frame_time-prev_frame_time)
-    except:
-        fps=1/0.000000001
+    # we will be subtracting it to get more accurate resultzz
+    fps = 1/(new_frame_time-prev_frame_time)
     prev_frame_time = new_frame_time
  
     # converting the fps into integer
