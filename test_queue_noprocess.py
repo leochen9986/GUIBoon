@@ -74,7 +74,7 @@ class FileVideoStream:
 # and reading from the input file
 # Change it to 0 if reading from webcam
 
-cap= FileVideoStream("test.gif").start()
+cap= FileVideoStream("media/marketing_layer/event2/1.mp4").start()
 time.sleep(1.0)
 
 # used to record the time when we processed last frame
@@ -103,7 +103,10 @@ while(cap.more()):
     # fps will be number of frame processed in given time frame
     # since their will be most of time error of 0.001 second
     # we will be subtracting it to get more accurate result
-    fps = 1/(new_frame_time-prev_frame_time)
+    try:
+        fps = 1/(new_frame_time-prev_frame_time)
+    except:
+        fps=1/0.000000001
     prev_frame_time = new_frame_time
  
     # converting the fps into integer
