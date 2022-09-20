@@ -74,7 +74,7 @@ class FileVideoStream:
 # and reading from the input file
 # Change it to 0 if reading from webcam
 background_frame=cv2.imread("media/background.jpg")
-cap= FileVideoStream("test.gif").start()
+cap= FileVideoStream("media/marketing_layer/event2/1.mp4").start()
 time.sleep(1.0)
 
 # used to record the time when we processed last frame
