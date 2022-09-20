@@ -7,7 +7,7 @@ import time
 # and reading from the input file
 # Change it to 0 if reading from webcam
 
-cap= cv2.VideoCapture("media/marketing_layer/event2/1.mp4")
+cap= cv2.VideoCapture("test.gif")
 
 # used to record the time when we processed last frame
 prev_frame_time = 0
