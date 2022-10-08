@@ -6,26 +6,39 @@ import serial
 import json
 def get_json_data():
 
-    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
-    ser.reset_input_buffer()
     data=""
+
+
+    ser = serial.Serial('/dev/ttyUSB1', 9600,timeout=1)
+    ser.reset_input_buffer()
+    #line = ser.readline().decode('utf-8').rstrip()
+    timer=time.time()
+
     while True:
         
         if ser.in_waiting > 0:
            
             line = ser.readline().decode('utf-8').rstrip()
+
+            
             if line.strip()!="":
                 data+=line
+                #print(line)
+            else:
+                data=""
+                return data
                 
             
-            if line.strip()=="}":
+            if "}" in line.strip():
                 break
-            
-            
+       
+        else:
+            if time.time()-timer > 3:
+                return ""
+        
     data = json.loads(data)
-
+        
     return data
-
 
 class GUI:
     def __init__(self, window, window_title, video_source="media/1.mp4"):
@@ -149,10 +162,12 @@ class GUI:
         """ refresh the content of the label every second """
         
         
-        self.esp32_data_current=get_json_data()  
+        self.esp32_data_current=get_json_data()
+        print(self.esp32_data_current)
         
         if self.esp32_data_current!="":
-            self.esp32_data=self.esp32_data_current
+            for key in self.esp32_data_current:               
+                self.esp32_data[key]=self.esp32_data_current[key]
 
         
         
@@ -167,20 +182,20 @@ class GUI:
             self.current_wifi="media/icons/nowifi.png"
             self.wifiIMG=Image.open(self.current_wifi).resize((50, 50))
             self.wifiImage = ImageTk.PhotoImage(self.wifiIMG)
-            self.canvas.itemconfig( self.wifiImage_container,image =self.wifiImage)             
+            self.canvas_icon.itemconfig( self.wifiImage_container,image =self.wifiImage)             
 
         #check cloud
-        if self.esp32_data["cloud_status"]==1 and self.current_wifi=="media/icons/nocloud.png":
+        if self.esp32_data["cloud_status"]==1 and self.current_cloud=="media/icons/nocloud.png":
             self.current_cloud="media/icons/cloud.png"
             self.cloudIMG=Image.open(self.current_cloud).resize((50, 50))
             self.cloudImage = ImageTk.PhotoImage(self.cloudIMG)
-            self.canvas.itemconfig( self.cloudImage_container,image =self.cloudImage)  
+            self.canvas_icon.itemconfig( self.cloudImage_container,image =self.cloudImage)  
             
-        elif self.esp32_data["cloud_status"]==0 and self.current_wifi=="media/icons/cloud.png":
+        elif self.esp32_data["cloud_status"]==0 and self.current_cloud=="media/icons/cloud.png":
             self.current_cloud="media/icons/nocloud.png"
-            self.wifiIMG=Image.open(self.current_cloud).resize((50, 50))
-            self.wifiImage = ImageTk.PhotoImage(self.cloudIMG)
-            self.canvas.itemconfig( self.cloudImage_container,image =self.cloudImage)  
+            self.cloudIMG=Image.open(self.current_cloud).resize((50, 50))
+            self.cloudImage = ImageTk.PhotoImage(self.cloudIMG)
+            self.canvas_icon.itemconfig( self.cloudImage_container,image =self.cloudImage)  
 
 
 

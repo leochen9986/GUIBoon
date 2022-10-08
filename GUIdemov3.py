@@ -2,11 +2,10 @@ import tkinter as tk
 import mpv
 import time
 from PIL import Image, ImageTk
-import serial
-import json
-def get_json_data():
 
-    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+def get_json_data():
+    '''
+    ser = serial.Serial('COM5', 115200, timeout=1)
     ser.reset_input_buffer()
     data=""
     while True:
@@ -20,10 +19,12 @@ def get_json_data():
             
             if line.strip()=="}":
                 break
-            
-            
     data = json.loads(data)
-
+    '''
+    data={"Motion_detected":0,"Bottle_placed":0,"wifi_status":1,"filling_status":0,"cloud_status":1,
+          "total_water_dispensed":10200,"tds_outlet":100,"tds_inlet":200,"operational_minutes":122,
+          "ph":7.2,"tank_level":1,"trip_state":0}
+    
     return data
 
 
@@ -32,14 +33,7 @@ class GUI:
         
         self.refresh_time=300
         
-        self.esp32_data_current=get_json_data()  
-        
-        if self.esp32_data_current=="":
-            self.esp32_data={"Motion_detected":0,"Bottle_placed":0,"wifi_status":1,"filling_status":0,"cloud_status":1,
-                  "total_water_dispensed":10200,"tds_outlet":100,"tds_inlet":200,"operational_minutes":122,
-                  "ph":7.2,"tank_level":1,"trip_state":0}
-        else:
-            self.esp32_data=self.esp32_data_current
+        self.esp32_data=get_json_data()        
         
         self.window = window
         #self.window.attributes('-fullscreen', True)
@@ -52,7 +46,8 @@ class GUI:
         
         # variable of event and screen counter
         self.event_counter_n = 1
-        self.screen_counter_n = 1        
+        self.screen_counter_n = 1    
+        self.screen_change_event=False
         
         self.canvas_icon = tk.Canvas(window, width = self.screen_height,
                          height = 50,background='white')
@@ -84,9 +79,9 @@ class GUI:
         
         #variable for bottleplaced delay
         self.bottle_delayed=0
-        #self.photo =  tk.PhotoImage(file = "media/background.png")
-        #self.container=self.canvas.create_image( 0, 0, image = self.photo, 
-                             #anchor = "nw")  
+        self.photo =  tk.PhotoImage(file = "media/background.png")
+        self.container=self.canvas.create_image( 0, 0, image = self.photo, 
+                             anchor = "nw")  
         
         
         ###############production layer#############################
@@ -137,7 +132,17 @@ class GUI:
         #set bottle delay 3sec timer
         self.bottle_delayed=time.time()
         
-    
+        
+        #testbuttons
+        self.testproximity=tk.Button(self.window, text ="Motion", command = self.proximitytoggle)
+        self.testproximitybool=False    
+        self.testproximity.place(x=0,y=0)
+
+
+        self.testbottle=tk.Button(self.window, text ="Bottle", command = self.bottletoggle)
+        self.testbottlebool=False    
+        self.testbottle.place(x=50,y=0)
+
 
         
         self.update()
@@ -147,21 +152,12 @@ class GUI:
     def update(self):
 
         """ refresh the content of the label every second """
-        
-        
-        self.esp32_data_current=get_json_data()  
-        
-        if self.esp32_data_current!="":
-            self.esp32_data=self.esp32_data_current
-
-        
-        
-        
+        self.esp32_data=get_json_data()
         if self.esp32_data["wifi_status"]==1 and self.current_wifi=="media/icons/nowifi.png":
             self.current_wifi="media/icons/wifi.png"
             self.wifiIMG=Image.open(self.current_wifi).resize((50, 50))
             self.wifiImage = ImageTk.PhotoImage(self.wifiIMG)
-            self.canvas_icon.itemconfig( self.wifiImage_container,image =self.wifiImage)  
+            self.canvas.itemconfig( self.wifiImage_container,image =self.wifiImage)  
             
         elif self.esp32_data["wifi_status"]==0 and self.current_wifi=="media/icons/wifi.png":
             self.current_wifi="media/icons/nowifi.png"
@@ -177,7 +173,7 @@ class GUI:
             self.canvas.itemconfig( self.cloudImage_container,image =self.cloudImage)  
             
         elif self.esp32_data["cloud_status"]==0 and self.current_wifi=="media/icons/cloud.png":
-            self.current_cloud="media/icons/nocloud.png"
+            self.current_wifi="media/icons/nocloud.png"
             self.wifiIMG=Image.open(self.current_cloud).resize((50, 50))
             self.wifiImage = ImageTk.PhotoImage(self.cloudIMG)
             self.canvas.itemconfig( self.cloudImage_container,image =self.cloudImage)  
@@ -187,11 +183,15 @@ class GUI:
         
         #print(self.testproximitybool)
         #Screen1
-        if self.esp32_data["Motion_detected"]==0:
+        if self.esp32_data["Motion_detected"]==0 and self.testproximitybool==False:
             if self.player._get_property("pause") or self.state!="default":
                 
                 #screen 3
                 if self.state=="bottleplaced":
+                    if self.esp32_data["filling_status"]!=0:
+                        self.off_bottletimer=time.time()
+                    
+                    
                     if time.time()-self.off_bottletimer>5:
                         self.state="default"
                         self.screen_counter_n=3
@@ -199,19 +199,25 @@ class GUI:
                         self.player._set_property("pause",False)
                         self.volume_label.place_forget()
                         self.tds_label.place_forget()
+                        self.screen_change_event=True
+                
                 
                 else:
                     self.state="default"
                     self.screen_counter_n=1
-                    self.event_counter_n+=1
-                    if self.event_counter_n>7:
-                        self.event_counter_n=1
+                    
+                    if self.screen_change_event:
+                        self.event_counter_n+=1
+                        if self.event_counter_n>7:
+                            self.event_counter_n=1
+                        self.screen_change_event=False
+                        
                         
                     self.player.play("media/marketing_layer/event{}/{}.mp4".format(self.event_counter_n,self.screen_counter_n))
                     self.player._set_property("pause",False)
 
         #Screen Instrcution
-        elif (self.esp32_data["Motion_detected"]==1 ) and (self.esp32_data["Bottle_placed"]==0) :
+        elif (self.esp32_data["Motion_detected"]==1 or self.testproximitybool==True) and (self.esp32_data["Bottle_placed"]==0 and self.testbottlebool==False) :
             
             if self.player._get_property("pause") or self.state=="default":
                 self.player.play("media/instruction.mp4")
@@ -230,7 +236,7 @@ class GUI:
 
 
         #Screen 2
-        elif self.esp32_data["Bottle_placed"]==1:
+        elif self.esp32_data["Bottle_placed"]==1 or self.testbottlebool==True :
             #parameter values
             self.volume_var.set("Volume:"+str(self.esp32_data["total_water_dispensed"]))
             self.volume_label.update_idletasks()
@@ -249,7 +255,7 @@ class GUI:
                 
                 if self.state=="proximity":
                     self.state="bottleplaced"
-                    self.off_bottletimer
+                    self.off_bottletimer=time.time()
                     
                           
             
@@ -258,5 +264,24 @@ class GUI:
         self.canvas_icon.after(self.refresh_time, self.update)        
 
         
+
+    def proximitytoggle(self):
+        if self.testproximitybool==False:
+            self.testproximitybool=True
+        else:
+            self.testproximitybool=False
+            
+        print("press motion")
+        return
+
+    def bottletoggle(self):
+        if self.testbottlebool==False:
+            self.testbottlebool=True
+            self.testproximitybool=True
+        else:
+            self.testbottlebool=False
+            self.testproximitybool=False
+        return
+
 
 GUI(tk.Tk(), "Tkinter and OpenCV")
