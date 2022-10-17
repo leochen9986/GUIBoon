@@ -69,9 +69,9 @@ class GUI:
         self.esp32_data=get_json_data()
         
         self.window = window
-        self.window.attributes('-fullscreen', True)
+        #self.window.attributes('-fullscreen', True)
         self.window.bind("<Escape>", lambda x:  self.window.destroy())
-        self.window.geometry("800x1280")
+        self.window.geometry("768x1366")
         self.window.title(window_title)
         
         self.screen_width = self.window.winfo_screenheight()
@@ -82,7 +82,7 @@ class GUI:
         self.canvas = tk.Canvas(window, width = self.screen_height,
                          height = self.screen_width,background='white')
         
-        self.canvas.pack()
+        self.canvas.pack(fill=tk.BOTH,expand=1)
         
         
         # variable of event and screen counter

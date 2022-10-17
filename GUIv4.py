@@ -4,9 +4,15 @@ import time
 from PIL import Image, ImageTk
 import serial
 import json
+import threading
+import queue
+
+esp_message=queue.Queue()
+
 
     
 def get_json_data():
+    global esp_message
 
     try:
 
@@ -29,8 +35,7 @@ def get_json_data():
                     data+=line
                     #print(line)
                 else:
-                    data=""
-                    return data
+                    None
                     
                 
                 if "}" in line.strip():
@@ -38,29 +43,27 @@ def get_json_data():
            
             else:
                 if time.time()-timer > 3:
-                    return ""
+                    None
             
         print(data)
         data = json.loads(data.strip().replace("}{",","))
             
-        return data
+        esp_message.put(data)
     except Exception as e:
         print(e)
-        return ""
+        None
 
 class GUI:
     def __init__(self, window, window_title, video_source="media/1.mp4"):
         
         self.refresh_time=300
         
-        self.esp32_data_current=get_json_data()  
+        self.esp32_data_current=""
         
-        if self.esp32_data_current=="":
-            self.esp32_data={"Motion_detected":0,"Bottle_placed":0,"wifi_status":1,"filling_status":0,"cloud_status":1,
-                  "total_water_dispensed":10200,"tds_outlet":100,"tds_inlet":200,"operational_minutes":122,
-                  "ph":7.2,"tank_level":1,"trip_state":0,"error_code":0}
-        else:
-            self.esp32_data=self.esp32_data_current
+        self.esp32_data={"Motion_detected":0,"Bottle_placed":0,"wifi_status":1,"filling_status":0,"cloud_status":1,
+              "total_water_dispensed":10200,"tds_outlet":100,"tds_inlet":200,"operational_minutes":122,
+              "ph":7.2,"tank_level":1,"trip_state":0,"error_code":0}
+
         
         self.window = window
         self.window.attributes('-fullscreen', True)
@@ -190,11 +193,17 @@ class GUI:
         
         
     def update(self):
-
+        global esp_message
         """ refresh the content of the label every second """
         
         
-        self.esp32_data_current=get_json_data()
+        if esp_message.qsize()>0:
+            for i in range(esp_message.qsize()):
+                self.esp32_data_current=esp_message.get()   
+                 
+        else:
+            self.esp32_data_current=""
+            
         print(self.esp32_data_current)
         
         if self.esp32_data_current!="":
@@ -274,7 +283,7 @@ class GUI:
                     self.player._set_property("pause",False)
 
         #Screen Instrcution
-        elif (self.esp32_data["Motion_detected"]==1 or  self.state=="proximity") and (self.esp32_data["Bottle_placed"]==0) :
+        elif ((self.esp32_data["Motion_detected"]==1 and self.state=="default") or  self.state=="proximity") and (self.esp32_data["Bottle_placed"]==0) :
             
             if self.player._get_property("pause") or self.state=="default":
                 self.player.play("media/instruction.mp4")
@@ -323,4 +332,7 @@ class GUI:
 
         
 
+get_message_td = threading.Thread(target=get_json_data, args=())
+get_message_td.start()        
+time.sleep(1)
 GUI(tk.Tk(), "Tkinter and OpenCV")
