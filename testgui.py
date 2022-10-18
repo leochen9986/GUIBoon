@@ -77,6 +77,10 @@ class GUI:
         self.screen_counter_n = 1    
         self.screen_change_event=False
          
+        self.canvas_icon = tk.Canvas(window, width = self.screen_height,
+                         height = 20,background='white')
+        
+        self.canvas_icon.pack(fill=tk.BOTH,expand=1)       
         
   
         self.canvas = tk.Canvas(window, width = self.screen_height,
