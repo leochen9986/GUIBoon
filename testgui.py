@@ -120,7 +120,7 @@ class GUI:
         self.playedvidintr=False
 
         
-        
+        '''
             #loading animation
         self.off_bottletimer=time.time()
         
@@ -178,7 +178,7 @@ class GUI:
         self.treatedvolume_label.place(x=10,y=1)  
 
         ############icon layers#####################
-        
+        '''
         
         #set bottle delay 3sec timer
         self.bottle_delayed=time.time()
@@ -244,9 +244,10 @@ class GUI:
         
         #print(self.testproximitybool)
         #Screen1
-        if self.esp32_data["Motion_detected"]==0 and (self.state=="default" or self.state=="bottleplaced"):
-            if self.player._get_property("pause") or self.state!="default":
+        if self.esp32_data["Motion_detected"]==0: #and (self.state=="default" or self.state=="bottleplaced"):
+            if self.player._get_property("pause"): #or self.state!="default":
                 
+                '''
                 #screen 3
                 if self.state=="bottleplaced":
                     
@@ -262,20 +263,21 @@ class GUI:
                         self.tds_label.place_forget()
                         self.ph_label.place_forget()
                         self.screen_change_event=True
+                '''
                 
-                else:
-                    self.state="default"
-                    self.screen_counter_n=1
+                #else:
+                self.state="default"
+                self.screen_counter_n=1
+                
+                if self.screen_change_event:
+                    self.event_counter_n+=1
+                    if self.event_counter_n>7:
+                        self.event_counter_n=1
+                    self.screen_change_event=False
                     
-                    if self.screen_change_event:
-                        self.event_counter_n+=1
-                        if self.event_counter_n>7:
-                            self.event_counter_n=1
-                        self.screen_change_event=False
-                        
-                        
-                    self.player.play("media/marketing_layer/event{}/{}.mp4".format(self.event_counter_n,self.screen_counter_n))
-                    self.player._set_property("pause",False)
+                    
+                self.player.play("media/marketing_layer/event{}/{}.mp4".format(self.event_counter_n,self.screen_counter_n))
+                self.player._set_property("pause",False)
         '''
         #Screen Instrcution
         elif (self.esp32_data["Motion_detected"]==1 or  self.state=="proximity") and (self.esp32_data["Bottle_placed"]==0) :
