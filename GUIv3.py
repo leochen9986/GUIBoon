@@ -53,7 +53,7 @@ class GUI:
         
         self.refresh_time=300
         
-        self.esp32_data_current=get_json_data()  
+        self.esp32_data_current=""
         
         if self.esp32_data_current=="":
             self.esp32_data={"Motion_detected":0,"Bottle_placed":0,"wifi_status":1,"filling_status":0,"cloud_status":1,
