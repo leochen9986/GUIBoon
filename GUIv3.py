@@ -63,7 +63,7 @@ class GUI:
             self.esp32_data=self.esp32_data_current
         
         self.window = window
-        self.window.attributes('-fullscreen', True)
+        #self.window.attributes('-fullscreen', True)
         self.window.bind("<Escape>", lambda x:  self.window.destroy())
         self.window.geometry("768x1366")
         self.window.title(window_title)
