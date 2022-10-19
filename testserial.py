@@ -7,52 +7,45 @@ import serial
 import json
 def get_json_data():
 
-    data=""
+    try:
+
+        data=""
 
 
-    ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
-        
+        ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
+        ser.reset_input_buffer()
+        #line = ser.readline().decode('utf-8').rstrip()
+        timer=time.time()
 
-    ser.reset_input_buffer()
-
-    #line = ser.readline().decode('utf-8').rstrip()
-    timer=time.time()
-
-    while True:
-        
-        if ser.in_waiting > 0:
-           
-            line = ser.readline().decode('utf-8').rstrip()
-
+        while True:
             
-            if line.strip()!="":
-                data+=line
-                #print(line)
-            else:
-                data=""
-                return data
+            if ser.in_waiting > 0:
+               
+                line = ser.readline().decode('utf-8').rstrip()
+
                 
+                if line.strip()!="":
+                    data+=line
+                    #print(line)
+                else:
+                    data=""
+                    return data
+                    
+                
+                if "}" in line.strip():
+                    break
+           
+            else:
+                if time.time()-timer > 3:
+                    return ""
             
-            if "}" in line.strip():
-                break
+        print(data)
+        data = json.loads(data.strip().replace("}{",","))
             
-            
-        else:
-            if time.time()-timer > 1.5:
-                return ""
-        
-    data = json.loads(data)
-        
-
-    '''
-    if ser.in_waiting == 0:
-        for i in "hello":
-            ser.write(i.encode())
-            print("write")
-            time.sleep(2)
-    '''
-
-    return data
+        return data
+    except Exception as e:
+        print(e)
+        return ""
 
 while True:
         print(get_json_data())
