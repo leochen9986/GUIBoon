@@ -8,39 +8,45 @@ import json
     
 def get_json_data():
 
-    data=""
+    try:
+
+        data=""
 
 
-    ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
-    ser.reset_input_buffer()
-    #line = ser.readline().decode('utf-8').rstrip()
-    timer=time.time()
+        ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
+        ser.reset_input_buffer()
+        #line = ser.readline().decode('utf-8').rstrip()
+        timer=time.time()
 
-    while True:
-        
-        if ser.in_waiting > 0:
-           
-            line = ser.readline().decode('utf-8').rstrip()
-
+        while True:
             
-            if line.strip()!="":
-                data+=line
-                #print(line)
-            else:
-                data=""
-                return data
+            if ser.in_waiting > 0:
+               
+                line = ser.readline().decode('utf-8').rstrip()
+
                 
+                if line.strip()!="":
+                    data+=line
+                    #print(line)
+                else:
+                    data=""
+                    return data
+                    
+                
+                if "}" in line.strip():
+                    break
+           
+            else:
+                if time.time()-timer > 3:
+                    return ""
             
-            if "}" in line.strip():
-                break
-       
-        else:
-            if time.time()-timer > 3:
-                return ""
-        
-    data = json.loads(data)
-        
-    return data
+        print(data)
+        data = json.loads(data.strip().replace("}{",","))
+            
+        return data
+    except Exception as e:
+        print(e)
+        return ""
 
 class GUI:
     def __init__(self, window, window_title, video_source="media/1.mp4"):
@@ -57,7 +63,7 @@ class GUI:
             self.esp32_data=self.esp32_data_current
         
         self.window = window
-        #self.window.attributes('-fullscreen', True)
+        self.window.attributes('-fullscreen', True)
         self.window.bind("<Escape>", lambda x:  self.window.destroy())
         self.window.geometry("768x1366")
         self.window.title(window_title)
