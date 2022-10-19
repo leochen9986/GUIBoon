@@ -194,7 +194,7 @@ class GUI:
         """ refresh the content of the label every second """
         
         
-        self.esp32_data_current=""
+        self.esp32_data_current=get_json_data()
         print(self.esp32_data_current)
         
         if self.esp32_data_current!="":
