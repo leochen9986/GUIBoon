@@ -8,46 +8,39 @@ import json
     
 def get_json_data():
 
-    try:
-
-        data=""
+    data=""
 
 
-        ser = serial.Serial('/dev/ttyUSB0', 9600,timeout=1)
-        ser.reset_input_buffer()
-        #line = ser.readline().decode('utf-8').rstrip()
-        timer=time.time()
+    ser = serial.Serial('/dev/ttyUSB1', 9600,timeout=1)
+    ser.reset_input_buffer()
+    #line = ser.readline().decode('utf-8').rstrip()
+    timer=time.time()
 
-        while True:
-            print("line")
-            if ser.in_waiting > 0:
-               
-                line = ser.readline().decode('utf-8').rstrip()
-                print(line)
-
-                
-                if line.strip()!="":
-                    data+=line
-                    #print(line)
-                else:
-                    data=""
-                    return data
-                    
-                
-                if "}" in line.strip():
-                    break
+    while True:
+        
+        if ser.in_waiting > 0:
            
+            line = ser.readline().decode('utf-8').rstrip()
+
+            
+            if line.strip()!="":
+                data+=line
+                #print(line)
             else:
-                if time.time()-timer > 3:
-                    return ""
+                data=""
+                return data
+                
             
-        print(data)
-        data = json.loads(data.strip().replace("}{",","))
-            
-        return data
-    except Exception as e:
-        print(e)
-        return ""
+            if "}" in line.strip():
+                break
+       
+        else:
+            if time.time()-timer > 3:
+                return ""
+        
+    data = json.loads(data)
+        
+    return data
 
 class GUI:
     def __init__(self, window, window_title, video_source="media/1.mp4"):
