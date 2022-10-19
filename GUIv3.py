@@ -51,7 +51,7 @@ def get_json_data():
 class GUI:
     def __init__(self, window, window_title, video_source="media/1.mp4"):
         
-        self.refresh_time=300
+        self.refresh_time=500
         
         self.esp32_data_current=""
         
