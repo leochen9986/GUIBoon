@@ -89,7 +89,7 @@ class GUI:
         
 
         
-        self.player = mpv.MPV(wid=str(int(self.canvas.winfo_id())), vo='x11')
+        self.player = mpv.MPV(wid=str(int(self.canvas.winfo_id())), input_default_bindings=True,input_vo_keyboard=True,osc=True)
 
         self.player._set_property("keep-open", "always")
         self.player._set_property("video-aspect","0.633")
@@ -194,7 +194,7 @@ class GUI:
         """ refresh the content of the label every second """
         
         
-        self.esp32_data_current=get_json_data()
+        self.esp32_data_current=""
         print(self.esp32_data_current)
         
         if self.esp32_data_current!="":
