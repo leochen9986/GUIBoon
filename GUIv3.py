@@ -19,10 +19,11 @@ def get_json_data():
         timer=time.time()
 
         while True:
-            
+            print("line")
             if ser.in_waiting > 0:
                
                 line = ser.readline().decode('utf-8').rstrip()
+                print(line)
 
                 
                 if line.strip()!="":
