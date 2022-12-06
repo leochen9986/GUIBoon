@@ -62,23 +62,16 @@ class GUI:
         
         self.canvas.pack(fill=tk.BOTH)
         
-        
+
         
         self.player = mpv.MPV(wid=str(int(self.canvas.winfo_id())), vo='x11')
 
         self.player._set_property("keep-open", "always")
-        self.player._set_property("video-aspect-override", str(self.screen_width)+":"+str(self.screen_height-int(self.screen_height/27)))
+        self.player._set_property("video-aspect-override", "0.945")
         #self.player._set_property("autofit", "100%")
         #print(self.player._get_property("autofit"))
         self.player.play("media/marketing_layer/event{}/{}.mp4".format(self.event_counter_n,self.screen_counter_n))
-        self.player._set_property("pause",True)
-        
-        #UNder Maintainence
-        self.maintainence_var = tk.StringVar()
-        self.maintainence_var.set("Under Maintainence")
-        self.maintainence_label = tk.Label(self.window, textvariable=self.maintainence_var,font=("Arial", int(self.screen_height*(1/50))))
-        self.maintainence_label.update_idletasks()
-        #self.maintainence_label.place(x=int(self.screen_width*0.5)-int(self.maintainence_label.winfo_width()*2),y=int(self.screen_height*0.5)-int(self.maintainence_label.winfo_height()/2))
+        self.player._set_property("pause",True)        
 
         #proximitysensorcheck
         self.is_Proximity = False
@@ -149,18 +142,17 @@ class GUI:
         #alert
         self.alert_var = tk.StringVar()
         self.alert_var.set("0")
-        self.alert_label = tk.Label(self.canvas_icon, textvariable=self.alert_var,font=("Arial", int(int(self.canvas_icon['height'])/2)),bg="white")
+        self.alert_label = tk.Label(self.canvas_icon, textvariable=self.alert_var, width=5 ,font=("Arial", int(int(self.canvas_icon['height'])/2)),bg="white")
         self.alert_label.update_idletasks()
-        self.alert_label.place(x=int(self.screen_width)-self.alert_label.winfo_width(),y=1)               
+        self.alert_label.place(x=int(self.screen_width*0.9),y=1)               
 
 
         #treated water
         self.treatedvolume_var = tk.StringVar()
         self.treatedvolume_var.set("Treated Water: 0")
-        self.treatedvolume_label = tk.Label(self.canvas_icon, textvariable=self.treatedvolume_var ,font=("Arial", int(int(self.canvas_icon['height'])/2)),bg="white")
+        self.treatedvolume_label = tk.Label(self.canvas_icon, textvariable=self.treatedvolume_var, width=int(int(self.canvas_icon['height'])/2) ,font=("Arial", int(int(self.canvas_icon['height'])/2)),bg="white")
         self.treatedvolume_label.update_idletasks()
-        
-        self.treatedvolume_label.place(x=int(self.screen_width)-self.alert_label.winfo_width()-int(self.treatedvolume_label.winfo_width()),y=1)    
+        self.treatedvolume_label.place(x=int(self.screen_width*0.75),y=1)    
         ############icon layers#####################
         
         
@@ -185,7 +177,6 @@ class GUI:
         
         
     def update(self):
-        
 
         """ refresh the content of the label every second """
         self.esp32_data=get_json_data()
@@ -221,13 +212,10 @@ class GUI:
         #update treated volume
         self.treatedvolume_var.set("Treated Water: "+str(self.esp32_data["total_water_dispensed"]))
         self.treatedvolume_label.update_idletasks()
-        self.alert_label.place(x=int(self.screen_width)-self.alert_label.winfo_width(),y=1)
-        self.treatedvolume_label.place(x=int(self.screen_width)-self.alert_label.winfo_width()*2-int(self.treatedvolume_label.winfo_width()),y=1) 
-        
         
         #print(self.testproximitybool)
         #Screen1
-        if self.esp32_data["Motion_detected"]==0 and self.testproximitybool==False and self.esp32_data["Bottle_placed"]==0 and self.testbottlebool==False:
+        if self.esp32_data["Motion_detected"]==0 and self.testproximitybool==False:
             if self.player._get_property("pause") or self.state!="default":
                 
                 #screen 3
@@ -294,7 +282,7 @@ class GUI:
 
             #self.volume_label.place(x=int(self.screen_height*0.35),y=int(self.screen_width*0.73))
             print(self.screen_width)
-            self.tds_label.place(x=int(self.screen_width*0.5)-self.tds_label.winfo_width(),y=int(self.screen_height*0.77))
+            self.tds_label.place(x=int(self.screen_width*0.4),y=int(self.screen_height*0.77))
             self.ph_label.place(x=int(self.screen_width*0.5),y=int(self.screen_height*0.77))
             
             if self.player._get_property("pause") or self.state!="bottleplaced" :
